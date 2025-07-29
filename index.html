@@ -28,9 +28,11 @@
         .modal { transition: opacity 0.25s ease; }
 
         /* --- Mobile Specific Styles --- */
-        /* Applied to the mobile container */
         .mobile-view { 
             overscroll-behavior: none; /* Prevents pull-to-refresh */
+            /* THAY ĐỔI: Sử dụng biến CSS --vh để tính chiều cao thực của viewport */
+            height: 100vh; /* Fallback cho trình duyệt cũ */
+            height: calc(var(--vh, 1vh) * 100);
         }
         .mobile-view .custom-scrollbar::-webkit-scrollbar { width: 6px; }
         .mobile-view .custom-scrollbar::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
@@ -40,7 +42,6 @@
         .mobile-view .toast { bottom: 100px; } /* Position toast above bottom nav */
 
         /* --- Desktop Specific Styles --- */
-        /* Applied to the desktop container */
         .desktop-view .loader { border-top-color: #3498db; }
         .desktop-view .toast { bottom: 30px; }
     </style>
@@ -105,7 +106,8 @@
     <!-- MOBILE VIEW : Giao diện mới cho điện thoại                          -->
     <!-- Hiển thị trên màn hình nhỏ (< 768px)                                -->
     <!-- =================================================================== -->
-    <div class="mobile-view md:hidden h-screen w-screen overflow-hidden flex flex-col">
+    <!-- THAY ĐỔI: Bỏ class h-screen để sử dụng chiều cao từ CSS -->
+    <div class="mobile-view md:hidden w-screen overflow-hidden flex flex-col">
         <!-- Main Content Area -->
         <div class="flex-1 flex flex-col overflow-hidden p-3 pb-0">
             <header class="text-center mb-3 shrink-0">
@@ -173,6 +175,18 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // --- THÊM MỚI: Sửa lỗi chiều cao trên di động ---
+            const setViewportHeight = () => {
+                // Chúng ta dùng một biến CSS để lưu chiều cao thực của viewport
+                const vh = window.innerHeight * 0.01;
+                document.documentElement.style.setProperty('--vh', `${vh}px`);
+            };
+            // Thiết lập giá trị khi tải trang
+            setViewportHeight();
+            // Tính toán lại khi thay đổi kích thước hoặc xoay màn hình
+            window.addEventListener('resize', setViewportHeight);
+            window.addEventListener('orientationchange', setViewportHeight);
+
             // --- Tham chiếu đến các thành phần ---
             const chineseTextAreaDesktop = document.getElementById('chinese-text-desktop');
             const vietnameseOutputDivDesktop = document.getElementById('vietnamese-text-desktop');
@@ -206,7 +220,6 @@
             // --- Các hàm chức năng chính ---
             const showToast = (message) => {
                 toast.textContent = message;
-                // Áp dụng class theo view để toast hiển thị đúng vị trí
                 if (window.innerWidth < 768) {
                     toast.classList.add('mobile-view');
                 } else {
@@ -257,7 +270,6 @@
                     return;
                 }
                 
-                // Cập nhật trạng thái loading cho cả 2 giao diện
                 loaderDesktop.classList.remove('hidden');
                 buttonTextDesktop.textContent = 'Đang dịch...';
                 translateButtonDesktop.disabled = true;
@@ -280,7 +292,6 @@
                     if (!response.ok) {
                         throw new Error(data.error || `Lỗi không xác định từ server (Mã: ${response.status})`);
                     }
-                    // Cập nhật kết quả cho cả 2 giao diện
                     vietnameseOutputDivDesktop.textContent = data.translation;
                     vietnameseOutputDivMobile.textContent = data.translation;
                 } catch (error) {
@@ -292,7 +303,6 @@
                     vietnameseOutputDivMobile.style.color = 'red';
                     showToast("Đã có lỗi xảy ra. Vui lòng thử lại.");
                 } finally {
-                    // Hoàn tất trạng thái loading cho cả 2 giao diện
                     loaderDesktop.classList.add('hidden');
                     buttonTextDesktop.textContent = 'Dịch văn bản';
                     translateButtonDesktop.disabled = false;
@@ -313,19 +323,16 @@
             };
 
             // --- Gán sự kiện cho các nút ---
-            // Desktop
             translateButtonDesktop.addEventListener('click', translateText);
             copyButtonDesktop.addEventListener('click', copyText);
             clearButtonDesktop.addEventListener('click', clearText);
             aboutButtonDesktop.addEventListener('click', showModal);
 
-            // Mobile
             translateButtonMobile.addEventListener('click', translateText);
             copyButtonMobile.addEventListener('click', copyText);
             clearButtonMobile.addEventListener('click', clearText);
             aboutButtonMobile.addEventListener('click', showModal);
             
-            // Nút đóng modal và click bên ngoài
             closeModalButton.addEventListener('click', hideModal);
             aboutModal.addEventListener('click', (event) => {
                 if (event.target === aboutModal) hideModal();
