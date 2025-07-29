@@ -2,20 +2,44 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trợ Lý Dịch Khai Thị - Ứng dụng Dịch thuật Phật giáo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Trợ Lý Dịch Khai Thị - Giao diện mới</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        /* General styling */
+        body { 
+            font-family: 'Inter', sans-serif; 
+            overscroll-behavior: none; /* Prevents pull-to-refresh on mobile */
+        }
+
+        /* Custom scrollbar for a cleaner look */
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #c4c4c4;
+            border-radius: 10px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
+        }
+
+        /* Styling for the loader animation inside the button */
         .loader {
-            border-top-color: #3498db;
+            border-top-color: #ffffff;
             animation: spin 1s linear infinite;
         }
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
         }
+
+        /* Styling for the toast notification */
         .toast {
             visibility: hidden;
             min-width: 250px;
@@ -28,77 +52,96 @@
             z-index: 100;
             left: 50%;
             transform: translateX(-50%);
-            bottom: 30px;
+            bottom: 100px; /* Positioned above the bottom nav */
             opacity: 0;
-            transition: opacity 0.5s, visibility 0.5s;
+            transition: opacity 0.5s, visibility 0.5s, bottom 0.5s;
         }
         .toast.show {
             visibility: visible;
             opacity: 1;
         }
+
+        /* Styling for the modal */
+        .modal {
+            transition: opacity 0.25s ease;
+        }
     </style>
 </head>
-<body class="bg-[#fffbbe] text-gray-800">
+<body class="bg-[#f0f2f5] text-gray-800 h-screen w-screen overflow-hidden flex flex-col">
 
-    <div class="container mx-auto p-4 md:p-8">
-        <header class="text-center mb-8">
-            <div class="flex justify-center items-center mb-4">
-                 <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-teal-600"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>
-                 <h1 class="text-3xl md:text-4xl font-bold text-teal-700 ml-3">Trợ Lý Dịch Khai Thị 2</h1>
-            </div>
-            <p class="text-md text-gray-600">Ứng dụng dịch thuật chuyên ngành Phật giáo từ Trung sang Việt</p>
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col overflow-hidden p-3 pb-0">
+        <header class="text-center mb-3 shrink-0">
+            <h1 class="text-xl font-bold text-teal-700">Trợ Lý Dịch Khai Thị</h1>
         </header>
-        
-        <main class="bg-white p-6 rounded-2xl shadow-lg">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <div class="flex justify-between items-center mb-2">
-                       <label for="chinese-text" class="block text-lg font-semibold text-gray-700">Văn bản tiếng Trung (Giản thể)</label>
-                        <button id="clear-button" class="text-sm text-red-500 hover:text-red-700 font-semibold flex items-center p-1 rounded-md transition-colors duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
-                            Xóa
-                        </button>
-                    </div>
-                   <!-- THAY ĐỔI: Bỏ rows="15" và thêm class h-96 để có chiều cao cố định -->
-                   <textarea id="chinese-text" class="w-full p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition duration-300 h-96" placeholder="Nhập hoặc dán văn bản tiếng Trung cần dịch vào đây..."></textarea>
-                </div>
 
-                <div>
-                    <label id="vietnamese-output-label" class="block text-lg font-semibold mb-2 text-gray-700">Bản dịch tiếng Việt</label>
-                    <!-- THAY ĐỔI: Bỏ style inline, thêm class h-96 và overflow-y-auto -->
-                    <div id="vietnamese-text"
-                         role="status"
-                         aria-live="polite"
-                         aria-labelledby="vietnamese-output-label"
-                         class="w-full p-4 border border-gray-300 rounded-lg bg-gray-100 transition duration-300 h-96 overflow-y-auto whitespace-pre-wrap"></div>
+        <!-- Container for the two text areas -->
+        <div class="flex-1 grid grid-rows-2 gap-3 overflow-hidden">
+            <!-- Chinese Input Area -->
+            <div class="bg-white rounded-xl shadow-sm flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center p-2 border-b border-gray-200 shrink-0">
+                    <label for="chinese-text" class="text-sm font-semibold text-gray-600">Văn bản gốc (Tiếng Trung)</label>
+                    <button id="clear-button" class="text-xs text-red-500 hover:bg-red-50 rounded-md p-1.5 transition-colors duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
                 </div>
+                <textarea id="chinese-text" class="w-full h-full p-3 text-base bg-transparent focus:outline-none resize-none custom-scrollbar" placeholder="Nhập hoặc dán văn bản tiếng Trung..."></textarea>
             </div>
 
-            <div class="text-center mt-6 flex justify-center items-center space-x-4">
-                <button id="translate-button" class="bg-teal-600 hover:bg-teal-700 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center">
-                   <svg id="loader" class="loader ease-linear rounded-full border-4 border-t-4 border-gray-200 h-6 w-6 mr-3 hidden" viewBox="0 0 24 24"></svg>
-                    <span id="button-text">Dịch văn bản</span>
-                </button>
-                <button id="copy-button" class="bg-gray-500 hover:bg-gray-600 text-white font-bold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                    Sao chép
-                </button>
-             </div>
-        </main>
-
-        <footer class="text-center mt-8 text-gray-500 text-sm">
-			<div class="mt-8 bg-white p-6 rounded-2xl shadow-lg">
-				<p class="text-center text-gray-700 italic leading-relaxed">
-					🙏🙏🙏 Vì tâm nguyện con muốn hoằng dương Pháp Môn Tâm Linh, mang những lời dạy quý giá của Sư Phụ Lư Quân Hoành đến gần hơn với tất cả mọi người, con đã xây dựng ứng dụng này! Trong quá trình hoằng pháp nếu con có gì sai sót, không Đúng Lý Đúng Pháp, Con xin Chư Phật, Chư Bồ Tát, Chư Thần Hộ Pháp, Từ Bi tha thứ cho con.
-				</p>
-			</div>
-        </footer>
+            <!-- Vietnamese Output Area -->
+            <div class="bg-white rounded-xl shadow-sm flex flex-col overflow-hidden">
+                <label id="vietnamese-output-label" class="text-sm font-semibold text-gray-600 p-2 border-b border-gray-200 shrink-0">Bản dịch (Tiếng Việt)</label>
+                <div id="vietnamese-text"
+                     role="status"
+                     aria-live="polite"
+                     aria-labelledby="vietnamese-output-label"
+                     class="w-full h-full p-3 text-base overflow-y-auto whitespace-pre-wrap custom-scrollbar"></div>
+            </div>
+        </div>
     </div>
+
+    <!-- Fixed Bottom Navigation Menu -->
+    <nav class="w-full bg-white shadow-[0_-2px_5px_rgba(0,0,0,0.05)] shrink-0">
+        <div class="max-w-md mx-auto grid grid-cols-3 gap-2 p-3">
+            <!-- About Button -->
+            <button id="about-button" class="flex flex-col items-center justify-center text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                <span class="text-xs font-medium">Giới thiệu</span>
+            </button>
+
+            <!-- Translate Button (Primary Action) -->
+            <button id="translate-button" class="bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg shadow-md hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300 flex items-center justify-center text-sm py-3 px-4">
+                <svg id="loader" class="loader ease-linear rounded-full border-2 border-t-2 border-gray-200 h-5 w-5 mr-2 hidden" viewBox="0 0 24 24"></svg>
+                <span id="button-text">Dịch văn bản</span>
+            </button>
+            
+            <!-- Copy Button -->
+            <button id="copy-button" class="flex flex-col items-center justify-center text-gray-600 hover:bg-gray-100 p-2 rounded-lg transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mb-1"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                <span class="text-xs font-medium">Sao chép</span>
+            </button>
+        </div>
+    </nav>
     
+    <!-- Toast Notification -->
     <div id="toast" class="toast"></div>
+
+    <!-- About Modal -->
+    <div id="about-modal" class="modal fixed inset-0 z-50 items-center justify-center bg-black bg-opacity-50 p-4 hidden" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+        <div class="bg-white rounded-2xl shadow-xl w-full max-w-sm mx-auto p-6 text-center">
+            <h3 id="modal-title" class="text-lg font-bold text-teal-700 mb-4">Lời ngỏ</h3>
+            <p class="text-sm text-gray-600 italic leading-relaxed">
+                🙏🙏🙏 Vì tâm nguyện con muốn hoằng dương Pháp Môn Tâm Linh, mang những lời dạy quý giá của Sư Phụ Lư Quân Hoành đến gần hơn với tất cả mọi người, con đã xây dựng ứng dụng này! Trong quá trình hoằng pháp nếu con có gì sai sót, không Đúng Lý Đúng Pháp, Con xin Chư Phật, Chư Bồ Tát, Chư Thần Hộ Pháp, Từ Bi tha thứ cho con.
+            </p>
+            <button id="close-modal-button" class="mt-6 bg-teal-600 text-white font-bold py-2 px-6 rounded-lg hover:bg-teal-700 transition-colors">
+                Đã hiểu
+            </button>
+        </div>
+    </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Get references to all interactive elements
             const translateButton = document.getElementById('translate-button');
             const chineseTextArea = document.getElementById('chinese-text');
             const vietnameseOutputDiv = document.getElementById('vietnamese-text');
@@ -107,19 +150,29 @@
             const loader = document.getElementById('loader');
             const buttonText = document.getElementById('button-text');
             const toast = document.getElementById('toast');
+            
+            // Modal elements
+            const aboutButton = document.getElementById('about-button');
+            const aboutModal = document.getElementById('about-modal');
+            const closeModalButton = document.getElementById('close-modal-button');
 
+            // --- Functionality ---
+
+            // Function to show toast notifications
             const showToast = (message) => {
                 toast.textContent = message;
                 toast.classList.add('show');
                 setTimeout(() => toast.classList.remove('show'), 3000);
             };
 
+            // Event listener for the clear button
             clearButton.addEventListener('click', () => {
                 chineseTextArea.value = '';
                 vietnameseOutputDiv.textContent = '';
                 showToast('Đã xóa nội dung.');
             });
             
+            // Event listener for the translate button
             translateButton.addEventListener('click', async () => {
                 const chineseText = chineseTextArea.value.trim();
                 if (!chineseText) {
@@ -127,13 +180,16 @@
                     return;
                 }
                 
+                // Update UI to show loading state
                 loader.classList.remove('hidden');
                 buttonText.textContent = 'Đang dịch...';
                 translateButton.disabled = true;
-                vietnameseOutputDiv.textContent = ''; // Xóa kết quả cũ
+                vietnameseOutputDiv.textContent = ''; 
                 vietnameseOutputDiv.style.color = 'inherit';
 
                 try {
+                    // This is a placeholder for your actual API call.
+                    // Replace '/api/translate' with your actual endpoint if needed.
                     const response = await fetch('/api/translate', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -143,11 +199,9 @@
                     const data = await response.json();
 
                     if (!response.ok) {
-                        // Nếu server trả về lỗi, hiển thị lỗi đó
-                        throw new Error(data.error || `Lỗi không xác định từ server.`);
+                        throw new Error(data.error || `Lỗi không xác định từ server (Mã: ${response.status})`);
                     }
                     
-                    // Hiển thị toàn bộ bản dịch trong một lần
                     vietnameseOutputDiv.textContent = data.translation;
 
                 } catch (error) {
@@ -156,12 +210,14 @@
                     vietnameseOutputDiv.style.color = 'red';
                     showToast("Đã có lỗi xảy ra. Vui lòng thử lại.");
                 } finally {
+                    // Restore UI after translation attempt
                     loader.classList.add('hidden');
                     buttonText.textContent = 'Dịch văn bản';
                     translateButton.disabled = false;
                 }
             });
 
+            // Event listener for the copy button
             copyButton.addEventListener('click', () => {
                 const chineseText = chineseTextArea.value.trim();
                 const vietnameseText = vietnameseOutputDiv.textContent.trim();
@@ -173,9 +229,11 @@
 
                 const textToCopy = `Bản gốc:\n${chineseText}\n\nBản dịch:\n${vietnameseText}`;
                 
+                // Use a temporary textarea to perform the copy command
                 const textArea = document.createElement("textarea");
                 textArea.value = textToCopy;
                 textArea.style.position = "fixed";
+                textArea.style.left = "-9999px"; // Move it off-screen
                 document.body.appendChild(textArea);
                 textArea.focus();
                 textArea.select();
@@ -187,6 +245,29 @@
                     showToast("Lỗi! Không thể sao chép.");
                 }
                 document.body.removeChild(textArea);
+            });
+
+            // --- Modal Logic ---
+
+            // Show modal
+            aboutButton.addEventListener('click', () => {
+                aboutModal.classList.remove('hidden');
+                aboutModal.classList.add('flex');
+            });
+
+            // Hide modal
+            const hideModal = () => {
+                aboutModal.classList.add('hidden');
+                aboutModal.classList.remove('flex');
+            };
+
+            closeModalButton.addEventListener('click', hideModal);
+            
+            // Also hide modal if user clicks on the background overlay
+            aboutModal.addEventListener('click', (event) => {
+                if (event.target === aboutModal) {
+                    hideModal();
+                }
             });
         });
     </script>
