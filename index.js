@@ -15,7 +15,7 @@ app.get('/', (req, res) => {
 // Xử lý yêu cầu dịch
 app.post('/api/translate', async (req, res) => {
   // !! QUAN TRỌNG: Thay thế bằng URL Google Apps Script của chính bạn !!
-  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT5d8rgo_YFKeJXBeBQXU8B_eEjhlI3Cv3QzZTrNapnD-FdFoSI7aP8-QW7QHVicvUXg/exec'; 
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwIk-Io-_3PvMRGLOM4ALe3T8yJz-aRcCBkIE_N_ZoxYi4inO7aBN-YUitnvCAf4tr7/exec'; 
   
   const { chineseText } = req.body;
 
